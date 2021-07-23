@@ -7,6 +7,7 @@ import HomeScreen from "../../screens/HomeScreen";
 import SearchScreen from "../../screens/SearchScreen";
 import { firebase } from "../../firebase/config";
 import ProfileScreen from "../../screens/ProfileScreen";
+import CommentScreen from "../../screens/CommentScreen";
 
 const EmptyScreen = () => {
   return null;
@@ -43,6 +44,7 @@ const TabMain = () => (
           <MaterialCommunityIcons name="plus-box" color={color} size={29} />
         ),
       }}
+      // listener inside component or inside naivgation ...
       listeners={({ navigation }) => ({
         tabPress: (event) => {
           event.preventDefault();
@@ -72,6 +74,8 @@ const TabMain = () => (
         },
       })}
     />
+
+    <Tab.Screen name="Comments" component={CommentScreen} />
   </Tab.Navigator>
 );
 

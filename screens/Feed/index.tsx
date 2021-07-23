@@ -1,36 +1,32 @@
-import { useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, FlatList, Image, Button } from "react-native";
+import { Text, View, FlatList, Image, Button } from "react-native";
 import { useSelector } from "react-redux";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { firebase } from "../../firebase/config";
+import st from "./styles";
 
-const FeedScreen = () => {
+const FeedScreen = (props) => {
   const { currentUser, following } = useSelector((state) => state?.user);
-  const { users, usersLoaded } = useSelector((state) => state.users);
   const [userPosts, setUserPosts] = useState([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
   const [isFollowing, setIsFollowing] = useState(false);
   const params = useRoute().params;
   const [posts, setPosts] = useState([]);
+  const { navigate } = useNavigation();
 
   useEffect(() => {
-    let posts = [];
-    // TOFINDOUT
-    for (let i = 0; i < following.length; i++) {
-      const user = users.find((user) => user.uid === following[i]);
-      if (user != undefined) {
-        // CHECK
-        posts = posts.concat(user.posts);
-      }
-
+    if (
+      props.usersFollowingLoaded == props.following.length &&
+      props.following.length !== 0
+    ) {
       // sort by creation date
-      posts.sort((x, y) => {
+      props.feed.sort((x, y) => {
         return x.creation - y.creation;
       });
       setPosts(posts);
     }
-  }, [usersLoaded]);
+  }, [props.userFollowingLoaded, props.feed]);
 
   useEffect(() => {
     /// CHECK user vs currentUSer
@@ -78,7 +74,7 @@ const FeedScreen = () => {
     } else {
       setIsFollowing(false);
     }
-  }, [params.uid, following]);
+  }, [params?.uid, following]);
 
   const onFollow = () => {
     firebase
@@ -100,11 +96,34 @@ const FeedScreen = () => {
       .delete();
   };
 
+  const onLikePress = (uid, postId) => {
+    firebase
+      .firestore()
+      .collection("posts")
+      .doc(uid)
+      .collection("userPosts")
+      .doc(postId)
+      .collection("likes")
+      .doc(firebase.auth().currentUser.uid)
+      .set({});
+  };
+  const onDislikePress = (uid, postId) => {
+    firebase
+      .firestore()
+      .collection("posts")
+      .doc(uid)
+      .collection("userPosts")
+      .doc(postId)
+      .collection("likes")
+      .doc(firebase.auth().currentUser.uid)
+      .delete();
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.containerInfo}>
-        <Text>{user.name}</Text>
-        <Text>{user.email}</Text>
+    <View style={st.container}>
+      <View style={st.containerInfo}>
+        <Text>{JSON.stringify(user)}</Text>
+        <Text>{JSON.stringify(user)}</Text>
         {params.uid !== firebase.auth().currentUser.uid ? (
           <View>
             {isFollowing ? (
@@ -116,7 +135,7 @@ const FeedScreen = () => {
               />
             ) : (
               <Button
-                title="Unfollow"
+                title="Follow"
                 onPress={() => {
                   onFollow();
                 }}
@@ -126,16 +145,41 @@ const FeedScreen = () => {
         ) : null}
       </View>
 
-      <View style={styles.containerGallery}>
+      <View style={st.containerGallery}>
         <FlatList
           numColumns={3}
           horizontal={false}
           data={posts}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.containerImage}>
-              <Text style={styles.container}>{item.user.name}</Text>
-              <Image style={styles.image} source={{ uri: item.downloadURL }} />
+            <View style={st.containerImage}>
+              <Text style={st.container}>{item.user.name}</Text>
+              <Image style={st.image} source={{ uri: item.downloadURL }} />
+
+              {item.currentUserLike ? (
+                <Button
+                  title="Like"
+                  onPress={() => {
+                    onLikePress(item.user.uid, item.id);
+                  }}
+                />
+              ) : (
+                <Button
+                  title="Dislike"
+                  onPress={() => {
+                    onDislikePress(item.user.uid, item.id);
+                  }}
+                />
+              )}
+              <Text
+                style={st.container}
+                onPress={
+                  (() => navigate("Comment"),
+                  { postId: item.id, uid: item.user.uid })
+                }
+              >
+                View Coomments...
+              </Text>
             </View>
           )}
         />
@@ -145,20 +189,3 @@ const FeedScreen = () => {
 };
 
 export default FeedScreen;
-
-const styles = StyleSheet.create({
-  container: { flex: 1, marginTop: 40 },
-
-  containerInfo: { marginVertical: 20 },
-  containerGallery: {
-    flex: 1,
-  },
-  image: {
-    flex: 1,
-    // AAA
-    aspectRatio: 1 / 1,
-  },
-  containerImage: {
-    flex: 1 / 3,
-  },
-});

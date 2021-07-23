@@ -44,9 +44,6 @@ const SearchScreen = () => {
         }}
       />
 
-
-      
-
       <FlatList
         horizontal={false}
         numColumns={1}

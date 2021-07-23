@@ -6,7 +6,7 @@ import { CLEAR_DATA } from "../actions/authActions";
 const initialState = {
   currentUser: "",
   posts: [],
-  following: [], // TOFINDOUT array??
+  following: [], // TOFINDOUT
 };
 
 export default (state = initialState, action) => {
@@ -30,18 +30,9 @@ export default (state = initialState, action) => {
       };
 
     case CLEAR_DATA:
-      // TOFINDOUT initialState must return clean data
       return {
         ...initialState,
       };
-      
-    /// todo USER_POST_STATE_CHANGE
-
-    // case USER_POST_STATE_CHANGE:
-    //     return {
-    //       ...state,
-    //       following: action.payload
-    //     }
     default:
       return state;
   }

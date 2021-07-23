@@ -5,12 +5,16 @@ import { useSelector } from "react-redux";
 
 import { firebase } from "../../firebase/config";
 
-const ProfileScreen = () => {
-  const { posts, currentUser, following } = useSelector((state) => state?.user);
+const ProfileScreen = (props) => {
+  const { posts, following } = useSelector((state) => state?.user);
   const [userPosts, setUserPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const params = useRoute().params;
+
+  const route = useRoute();
+  // TODO
+  const currentUser = { ...props };
 
   useEffect(() => {
     /// CHECK user vs currentUSer
@@ -122,8 +126,6 @@ const ProfileScreen = () => {
       </View>
 
       <View style={styles.containerGallery}>
-        {/* {posts.map((post) => {})} */}
-
         <FlatList
           numColumns={3}
           horizontal={false}
